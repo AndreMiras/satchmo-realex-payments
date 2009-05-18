@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<request type='auth' timestamp='{{ order.timestamp }}'>
+  <merchantid>{{ config.merchant_id }}</merchantid>
+  {% if config.subaccount %}
+  <account>{{ config.subaccount }}</account>
+  {% endif %}
+  <orderid>{{ order.realex_order_id }}</orderid>
+  <amount currency='{{ order.currency }}'>{{ order.amount }}</amount>
+  <card>
+    <number>{{ card.number }}</number>
+    <expdate>{{ card.expdate }}</expdate>
+    <type>{{ card.type }}</type>
+    {% if card.issue_num %}
+    <issueno>{{ card.issue_num }}</issueno>
+    {% endif %}
+    <chname>{% if card.card_holder %}{{ card.card_holder }}{% else %}{{ bill_to.full_name }}{% endif %}</chname>
+  </card>
+  <autosettle flag='1'/>
+  <tssinfo>
+    <custnum>{{ order.contact_id }}</custnum>
+    <varref>{{ order.satchmo_order_id }}</varref>
+    <prodid>{% for prod_id in order.product_ids %}{{ prod_id }}{% if not forloop.last %}, {% endif %}{% endfor %}</prodid>
+    <address type="billing">
+        <country>{{ bill_to.country }}</country>
+    </address>
+    <address type="shipping">
+        <country>{{ ship_to.country }}</country>
+    </address>
+  </tssinfo>
+  {% ifequal config.hash_method "md5" %}
+  <md5hash>{{ order.hash }}</md5hash>
+  {% else %}
+  <sha1hash>{{ order.hash }}</sha1hash>
+  {% endifequal %}
+</request>
