@@ -17,7 +17,7 @@ class RealexPayments(models.Model):
     paydate = models.DateField(_('Paid on'), auto_now_add=True)
     realex_response_code = models.CharField(max_length=20,
         help_text="Realex response code.")
-    realex_response_message = models.CharField(max_length=50,
+    realex_response_message = models.CharField(max_length=255,
         help_text='Realex response message.')
 
     def __unicode__(self):
