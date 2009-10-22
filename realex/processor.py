@@ -4,9 +4,9 @@ from realex.models import RealexPayments
 from time import strftime
 from xml.dom import minidom
 from django.template import Context, loader
+from django.utils.translation import ugettext_lazy as _
 from satchmo.payment.utils import record_payment
 from satchmo.payment.modules.base import BasePaymentProcessor
-
 import forms
 FORM = forms.RealexCreditPayShipForm
 
@@ -53,12 +53,11 @@ class PaymentProcessor(BasePaymentProcessor):
         cc = data.credit_card
         contact = data.contact
 
-        amount = int((data.balance * 100).to_integral()) # 2999 = 29.99"
+        amount = int((data.balance * 100).to_integral()) # 2999 = 29.99
         currency = settings.CURRENCY_CODE.value
         cardnumber = cc.decryptedCC # "4111111111111111"
         cardname = cc.card_holder
         cardtype = cc.credit_type
-        # cardtype = self.ccTypeRealex(cc.credit_type)
         expdate = "%02i%02i" % (cc.expire_month, cc.expire_year % 1000) # "mmyy"
 
         # From Realex Payments
@@ -219,6 +218,9 @@ class PaymentProcessor(BasePaymentProcessor):
             realex_authcode = reply_dict['authcode'],
             realex_response_code = code,
             realex_response_message = message)
-        realexObj.save()
+        try:
+            realexObj.save()
+        except:
+            pass
 
         return success, code, message
