@@ -39,7 +39,7 @@ config_register_list(
 
     BooleanValue(PAYMENT_GROUP,
         'DO_POST',
-        description=_("Send requests to Realex in test mode"),
+        description=_("Send requests to Realex when in test mode"),
         help_text=_("False if you do not want to post requests to Realex in test mode"),
         default=True),
 
