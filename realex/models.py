@@ -1,6 +1,9 @@
+import config
 from django.db import models
-from satchmo.shop.models import Order
+from satchmo_store.shop.models import Order
 from django.utils.translation import ugettext_lazy as _
+
+PAYMENT_PROCESSOR=True
 
 class RealexPayments(models.Model):
     order = models.ForeignKey(Order)

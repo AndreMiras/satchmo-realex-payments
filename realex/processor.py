@@ -4,11 +4,11 @@ from realex.models import RealexPayments
 from time import strftime
 from xml.dom import minidom
 from django.template import Context, loader
+from payment.modules.base import BasePaymentProcessor, ProcessorResult
 from django.utils.translation import ugettext_lazy as _
-from satchmo.payment.utils import record_payment
-from satchmo.payment.modules.base import BasePaymentProcessor
-import forms
-FORM = forms.RealexCreditPayShipForm
+
+# from realex import forms
+# FORM = forms.RealexCreditPayShipForm
 
 class PaymentProcessor(BasePaymentProcessor):
     """
@@ -34,17 +34,7 @@ class PaymentProcessor(BasePaymentProcessor):
             self.hashfunc = sha.new
         # self.auth = settings.AUTH_TYPE.value
 
-    def createHash(self, s):
-        """
-        Creates the hash that is needed
-        timestamp + '.'+MerchantID + '.'+satchmo_order_id + '.'+amount +'.'+'EUR'+'.'+card_number
-        """
-        if self.settings.HASHALGO.value == "md5":
-            return md5.new(s).hexdigest()
-        return sha.new(s).hexdigest()
-
-
-    def prepareData(self, data):
+    def prepare_data(self, data):
         # data will contain an order object
         # use this data to create the unique string that will
         # be sent to the payment processor
@@ -58,6 +48,7 @@ class PaymentProcessor(BasePaymentProcessor):
         cardnumber = cc.decryptedCC # "4111111111111111"
         cardname = cc.card_holder
         cardtype = cc.credit_type
+        # cardtype = self.ccTypeRealex(cc.credit_type)
         expdate = "%02i%02i" % (cc.expire_month, cc.expire_year % 1000) # "mmyy"
 
         # From Realex Payments
@@ -113,7 +104,7 @@ class PaymentProcessor(BasePaymentProcessor):
 
 
     def post_xml_request(self, realex_post_url):
-        t = loader.get_template('checkout/realex/request.xml')
+        t = loader.get_template('shop/checkout/realex/request.xml')
         c = Context({
             'bill_to' : self.bill_to,
             'ship_to' : self.ship_to,
@@ -179,25 +170,29 @@ class PaymentProcessor(BasePaymentProcessor):
         Process payments
         Return True if successful, False if not plus an error message
         """
+        payment = None
         if not self.do_post:
             transaction_id = 'TESTING'
-            record_payment(self.data, self.settings, amount=self.data.balance, transaction_id=transaction_id)
-
+            code = '00'
+            payment = self.record_payment(order=self.data, reason_code=code,
+                amount=self.data.balance, transaction_id=transaction_id)
             realexObj = RealexPayments(
                 order = self.data,
                 realex_merchant_id = self.config['merchant_id'],
                 realex_order_id = self.order['realex_order_id'],
-                realex_response_code = '00',
+                realex_response_code = code,
                 realex_response_message = 'Test realex order')
             realexObj.save()
-            return True, '00', 'Test realex order'
+            return ProcessorResult(self.key, True, 'Test realex order',
+                payment=payment)
             
         realex_url = self.settings.POST_URL.value
         try:
             results = self.post_xml_request(realex_url)
         except urllib2.HTTPError, e:
             self.log.error("error opening %s\n%s", realex_url, e)
-            return(False, 'ERROR', _('Could not reach Realex gateway'))
+            return ProcessorResult(self.key, False,
+                _('Could not reach Realex gateway'))
 
         reply_dict = self.parse_xml_reply(results)
         code = reply_dict['code']
@@ -206,9 +201,11 @@ class PaymentProcessor(BasePaymentProcessor):
             (self.demo and (code in ("104"))) # UNABLE TO AUTH (realex payments test only), this code is not more documentated by Realex
         if success:
             transaction_id = self.demo and 'TESTING' or reply_dict['pasref']
-            record_payment(self.data, self.settings, amount=self.data.balance, transaction_id=transaction_id)
+            payment = self.record_payment(order=self.data, reason_code=code,
+                amount=self.data.balance, transaction_id=transaction_id)
 #        else:
-#            record_payment(self.data, self.settings, amount=self.data.balance, transaction_id='PENDING')
+#            payment = self.record_payment(order=self.data, reason_code=code,
+#               amount=self.data.balance, transaction_id='PENDING')
 
         realexObj = RealexPayments(
             order = self.data,
@@ -218,9 +215,6 @@ class PaymentProcessor(BasePaymentProcessor):
             realex_authcode = reply_dict['authcode'],
             realex_response_code = code,
             realex_response_message = message)
-        try:
-            realexObj.save()
-        except:
-            pass
+        realexObj.save()
 
-        return success, code, message
+        return ProcessorResult(self.key, success, message, payment=payment)

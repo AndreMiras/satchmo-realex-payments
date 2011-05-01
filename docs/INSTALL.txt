@@ -1,11 +1,17 @@
-= Install Instructions =
+== Install instructions ==
 
-== 1) Modify your settings ==
-In order to enable realex payment processor, you must add it to the CUSTOM_PAYMENT_MODULES variable in your local_settings.py:
-'CUSTOM_PAYMENT_MODULES' : ['realex'],
 
-== 2) Copy the XML template ==
+=== 1) Check out the code: ===
+{{{
+$ svn checkout http://satchmo-realex-payments.googlecode.com/svn/trunk/ realex
+}}}
+
+=== 2) Modify your settings ===
+In order to enable realex payment processor, you must add realex to your INSTALLED_APPS.
+
+=== 3) Copy the XML template ===
 Move request.xml template into templates/checkout/realex/
 
-== 3) Configure Realex payment through settings interface ==
+=== 4) Configure Realex payment through settings interface ===
 "Realex Payment" section in http://localhost:8000/settings/
+
