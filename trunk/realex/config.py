@@ -1,13 +1,13 @@
-from satchmo.configuration import *
+from livesettings import *
 from django.utils.translation import ugettext_lazy as _
 
 
-PAYMENT_MODULES = config_get('PAYMENT', 'MODULES')
-PAYMENT_MODULES.add_choice(('PAYMENT_REALEX', 'Realex'))
+# PAYMENT_MODULES = config_get('PAYMENT', 'MODULES')
+# PAYMENT_MODULES.add_choice(('PAYMENT_REALEX', 'Realex'))
 
 PAYMENT_GROUP = ConfigurationGroup('PAYMENT_REALEX',
 _('Realex Payment Settings'),
-requires=PAYMENT_MODULES,
+# requires=PAYMENT_MODULES,
 ordering=102)
 
 
@@ -46,7 +46,7 @@ config_register_list(
     StringValue(PAYMENT_GROUP,
         'LABEL',
         description=_('English name for this group on the checkout screens'),
-        default = 'Credit Cards',
+        default = 'Realex Payments',
         help_text = _('This will be passed to the translation utility')),
 
     BooleanValue(PAYMENT_GROUP,
@@ -90,12 +90,12 @@ config_register_list(
     StringValue(PAYMENT_GROUP,
         'MERCHANT_ID',
         description=_('Your Realex Merchant ID'),
-        default=""),
+        default="internettest"),
 
     StringValue(PAYMENT_GROUP,
         'PASSWORD',
         description=_('Your Realex password'),
-        default=""),
+        default="secret"),
 
     StringValue(PAYMENT_GROUP,
         'SUB_ACCOUNT',
