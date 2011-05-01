@@ -1,10 +1,11 @@
-Here is how you install Realex payments module:
+= Install Instructions =
 
-1) Modify your settings
+== 1) Modify your settings ==
 In order to enable realex payment processor, you must add it to the CUSTOM_PAYMENT_MODULES variable in your local_settings.py:
 'CUSTOM_PAYMENT_MODULES' : ['realex'],
 
-2) Copy the XML template
-We also need to move request.xml template into templates/checkout/realex/
+== 2) Copy the XML template ==
+Move request.xml template into templates/checkout/realex/
 
-3) Configure Realex payment through settings interface
+== 3) Configure Realex payment through settings interface ==
+"Realex Payment" section in http://localhost:8000/settings/

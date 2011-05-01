@@ -1,2 +1,1 @@
 - Realex sub-account support
-- Satchmo 0.9 integration
