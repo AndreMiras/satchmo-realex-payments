@@ -10,7 +10,7 @@ $ svn checkout http://satchmo-realex-payments.googlecode.com/svn/trunk/ realex
 In order to enable realex payment processor, you must add realex to your INSTALLED_APPS.
 
 === 3) Copy the XML template ===
-Move request.xml template into templates/checkout/realex/
+Move request.xml template into templates/shop/checkout/realex/
 
 === 4) Configure Realex payment through settings interface ===
 "Realex Payment" section in http://localhost:8000/settings/
